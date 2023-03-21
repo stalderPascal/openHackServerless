@@ -8,6 +8,8 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Bfyoc.Functions
 {
@@ -65,13 +67,75 @@ namespace Bfyoc.Functions
             
             return new OkObjectResult(r);
         }
+    
+        [FunctionName("GetRating")]
+        public static IActionResult RunGetRating(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req,
+            [CosmosDB("bfyoc", "ratings", ConnectionStringSetting = "CosmosDbConnectionString", SqlQuery = "SELECT * FROM c")] IEnumerable<UserRating> userRatings,
+            ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            if (userRatings is null)
+            {
+                return new NotFoundResult();
+            }
+
+            string idAsString = req.Query["ratingId"];
+
+            Guid id;
+            if(!Guid.TryParse(idAsString, out id)){
+
+            }
+
+            return new OkObjectResult(userRatings.Where(r => r.UserId == id));
+        }
+
+        [FunctionName("GetAllRatings")]
+        public static IActionResult RunGetAllRatings(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req,
+            [CosmosDB("bfyoc", "ratings", ConnectionStringSetting = "CosmosDbConnectionString", SqlQuery = "SELECT * FROM c")] IEnumerable<UserRating> userRatings,
+            ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            if (userRatings is null)
+            {
+                return new NotFoundResult();
+            }
+
+            return new OkObjectResult(userRatings);
+        }
+
+        [FunctionName("GetRatings")]
+        public static IActionResult RunGetRatings(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)] HttpRequest req,
+            [CosmosDB("bfyoc", "ratings", ConnectionStringSetting = "CosmosDbConnectionString", SqlQuery = "SELECT * FROM c")] IEnumerable<UserRating> userRatings,
+            ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            if (userRatings is null)
+            {
+                return new NotFoundResult();
+            }
+
+            string userIdAsString = req.Query["userId"];
+
+            Guid userId;
+            if(!Guid.TryParse(userIdAsString, out userId)){
+
+            }
+
+            return new OkObjectResult(userRatings.Where(r => r.UserId == userId));
+        }
     }
 
     public class UserRating
     {
         public UserRating()
         {
-            Id = Guid.NewGuid();
+            id = Guid.NewGuid();
             Timestamp = DateTime.UtcNow;
         }
 
@@ -81,6 +145,6 @@ namespace Bfyoc.Functions
         public int Rating { get; set; }
         public string UserNotes { get; set; }
         public DateTime Timestamp { get; private set; }
-        public Guid Id { get; private set; }
+        public Guid id { get; private set; }
     }
 }
