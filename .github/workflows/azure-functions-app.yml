@@ -16,6 +16,20 @@ env:
   DOTNET_VERSION: '6.0.x'                   # set this to the dotnet version to use (e.g. '2.1.x', '3.1.x', '5.0.x')
 
 jobs:
+  deploy-infra:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIAL }}
+    - uses: azure/arm-deploy@v1
+      with:
+        resourceGroupName: github-action-arm-rg
+        template: infrastructure/database/template.json
+        parameters: infrastructure/database/parameters.json
+        additionalArguments: "--what-if --rollback-on-error --what-if-exclude-change-types Create Ignore"
+
   build-and-deploy:
     runs-on: windows-latest
     environment: dev
@@ -41,5 +55,5 @@ jobs:
         app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
         package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
         publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
-
+  
 # For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
