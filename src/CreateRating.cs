@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -12,9 +13,12 @@ namespace Bfyoc.Functions
 {
     public static class CreateRating
     {
+        static readonly HttpClient client = new HttpClient();
+
         [FunctionName("CreateRating")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)] HttpRequest req,
+            [CosmosDB("bfyoc", "ratings", ConnectionStringSetting = "CosmosDbConnectionString")] IAsyncCollector<dynamic> documentsOut,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
@@ -32,6 +36,20 @@ namespace Bfyoc.Functions
                 return new BadRequestResult();
             }
 
+            using HttpResponseMessage productValidationResponse = await client.GetAsync($"https://serverlessohapi.azurewebsites.net/api/GetProduct?productId={productId}");
+            var productValidationMessage = await productValidationResponse.Content.ReadAsStringAsync();
+            if (productValidationMessage == "Please pass a valid productId on the query string")
+            {
+                return new BadRequestResult();
+            }
+
+            using HttpResponseMessage userValidationResponse = await client.GetAsync($"https://serverlessohapi.azurewebsites.net/api/GetUser?userId={userId}");
+            var userValidationMessage = await userValidationResponse.Content.ReadAsStringAsync();
+            if (userValidationMessage == "Please pass a valid userId on the query string")
+            {
+                return new BadRequestResult();
+            }
+
             // Create Rating
             var r = new UserRating 
             {
@@ -43,7 +61,7 @@ namespace Bfyoc.Functions
             };
 
             // Store Rating
-            
+            await documentsOut.AddAsync(r);
             
             return new OkObjectResult(r);
         }
