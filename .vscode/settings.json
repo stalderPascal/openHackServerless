@@ -1,0 +1,8 @@
+{
+    "azureFunctions.javaBuildTool": "maven",
+    "azureFunctions.deploySubpath": "target/azure-functions/group2artifact-20230321100720249",
+    "azureFunctions.projectLanguage": "Java",
+    "azureFunctions.projectRuntime": "~4",
+    "debug.internalConsoleOptions": "neverOpen",
+    "azureFunctions.preDeployTask": "package (functions)"
+}
