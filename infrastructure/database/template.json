@@ -1,0 +1,186 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "databaseAccounts_g2_bfyoc_cosmosdb_name": {
+            "defaultValue": "g2-bfyoc-cosmosdb",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts",
+            "apiVersion": "2022-11-15",
+            "name": "[parameters('databaseAccounts_g2_bfyoc_cosmosdb_name')]",
+            "location": "West Europe",
+            "tags": {
+                "defaultExperience": "Core (SQL)",
+                "hidden-cosmos-mmspecial": ""
+            },
+            "kind": "GlobalDocumentDB",
+            "identity": {
+                "type": "None"
+            },
+            "properties": {
+                "publicNetworkAccess": "Enabled",
+                "enableAutomaticFailover": false,
+                "enableMultipleWriteLocations": false,
+                "isVirtualNetworkFilterEnabled": false,
+                "virtualNetworkRules": [],
+                "disableKeyBasedMetadataWriteAccess": false,
+                "enableFreeTier": false,
+                "enableAnalyticalStorage": false,
+                "analyticalStorageConfiguration": {
+                    "schemaType": "WellDefined"
+                },
+                "databaseAccountOfferType": "Standard",
+                "defaultIdentity": "FirstPartyIdentity",
+                "networkAclBypass": "None",
+                "disableLocalAuth": false,
+                "enablePartitionMerge": false,
+                "minimalTlsVersion": "Tls",
+                "consistencyPolicy": {
+                    "defaultConsistencyLevel": "Session",
+                    "maxIntervalInSeconds": 5,
+                    "maxStalenessPrefix": 100
+                },
+                "locations": [
+                    {
+                        "locationName": "West Europe",
+                        "provisioningState": "Succeeded",
+                        "failoverPriority": 0,
+                        "isZoneRedundant": false
+                    }
+                ],
+                "cors": [
+                    {
+                        "allowedOrigins": "*"
+                    }
+                ],
+                "capabilities": [
+                    {
+                        "name": "EnableServerless"
+                    }
+                ],
+                "ipRules": [],
+                "backupPolicy": {
+                    "type": "Periodic",
+                    "periodicModeProperties": {
+                        "backupIntervalInMinutes": 240,
+                        "backupRetentionIntervalInHours": 8,
+                        "backupStorageRedundancy": "Geo"
+                    }
+                },
+                "networkAclBypassResourceIds": [],
+                "keysMetadata": {}
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+            "apiVersion": "2022-11-15",
+            "name": "[concat(parameters('databaseAccounts_g2_bfyoc_cosmosdb_name'), '/bfyoc')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_g2_bfyoc_cosmosdb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "id": "bfyoc"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions",
+            "apiVersion": "2022-11-15",
+            "name": "[concat(parameters('databaseAccounts_g2_bfyoc_cosmosdb_name'), '/00000000-0000-0000-0000-000000000001')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_g2_bfyoc_cosmosdb_name'))]"
+            ],
+            "properties": {
+                "roleName": "Cosmos DB Built-in Data Reader",
+                "type": "BuiltInRole",
+                "assignableScopes": [
+                    "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_g2_bfyoc_cosmosdb_name'))]"
+                ],
+                "permissions": [
+                    {
+                        "dataActions": [
+                            "Microsoft.DocumentDB/databaseAccounts/readMetadata",
+                            "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/executeQuery",
+                            "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/readChangeFeed",
+                            "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/read"
+                        ],
+                        "notDataActions": []
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions",
+            "apiVersion": "2022-11-15",
+            "name": "[concat(parameters('databaseAccounts_g2_bfyoc_cosmosdb_name'), '/00000000-0000-0000-0000-000000000002')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_g2_bfyoc_cosmosdb_name'))]"
+            ],
+            "properties": {
+                "roleName": "Cosmos DB Built-in Data Contributor",
+                "type": "BuiltInRole",
+                "assignableScopes": [
+                    "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_g2_bfyoc_cosmosdb_name'))]"
+                ],
+                "permissions": [
+                    {
+                        "dataActions": [
+                            "Microsoft.DocumentDB/databaseAccounts/readMetadata",
+                            "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/*",
+                            "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers/items/*"
+                        ],
+                        "notDataActions": []
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+            "apiVersion": "2022-11-15",
+            "name": "[concat(parameters('databaseAccounts_g2_bfyoc_cosmosdb_name'), '/bfyoc/raitings')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('databaseAccounts_g2_bfyoc_cosmosdb_name'), 'bfyoc')]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('databaseAccounts_g2_bfyoc_cosmosdb_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "id": "raitings",
+                    "indexingPolicy": {
+                        "indexingMode": "consistent",
+                        "automatic": true,
+                        "includedPaths": [
+                            {
+                                "path": "/*"
+                            }
+                        ],
+                        "excludedPaths": [
+                            {
+                                "path": "/\"_etag\"/?"
+                            }
+                        ]
+                    },
+                    "partitionKey": {
+                        "paths": [
+                            "/id"
+                        ],
+                        "kind": "Hash",
+                        "version": 2
+                    },
+                    "uniqueKeyPolicy": {
+                        "uniqueKeys": []
+                    },
+                    "conflictResolutionPolicy": {
+                        "mode": "LastWriterWins",
+                        "conflictResolutionPath": "/_ts"
+                    }
+                }
+            }
+        }
+    ]
+}
