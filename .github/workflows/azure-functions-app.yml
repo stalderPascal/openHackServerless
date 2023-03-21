@@ -25,9 +25,8 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIAL }}
     - uses: azure/arm-deploy@v1
       with:
-        resourceGroupName: github-action-arm-rg
+        resourceGroupName: ServerlessOpenHackRG02-westeurope
         template: infrastructure/database/template.json
-        parameters: infrastructure/database/parameters.json
         additionalArguments: "--what-if --rollback-on-error --what-if-exclude-change-types Create Ignore"
 
   build-and-deploy:
