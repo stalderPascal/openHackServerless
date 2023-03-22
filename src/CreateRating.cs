@@ -87,8 +87,14 @@ namespace Bfyoc.Functions
             if(!Guid.TryParse(idAsString, out id)){
                 return new BadRequestResult();
             }
+            var filtered = userRatings.Where(r => r.id == id);
 
-            return new OkObjectResult(userRatings.Where(r => r.id == id));
+            if(!filtered.Any())
+            {
+                return new NotFoundResult();
+            }
+
+            return new OkObjectResult(filtered);
         }
 
         [FunctionName("GetAllRatings")]
