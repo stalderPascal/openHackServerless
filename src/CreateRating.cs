@@ -85,10 +85,10 @@ namespace Bfyoc.Functions
 
             Guid id;
             if(!Guid.TryParse(idAsString, out id)){
-
+                return new BadRequestResult();
             }
 
-            return new OkObjectResult(userRatings.Where(r => r.UserId == id));
+            return new OkObjectResult(userRatings.Where(r => r.id == id));
         }
 
         [FunctionName("GetAllRatings")]
@@ -124,7 +124,7 @@ namespace Bfyoc.Functions
 
             Guid userId;
             if(!Guid.TryParse(userIdAsString, out userId)){
-
+                return new BadRequestResult();
             }
 
             return new OkObjectResult(userRatings.Where(r => r.UserId == userId));
