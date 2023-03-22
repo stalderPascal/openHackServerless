@@ -144,7 +144,7 @@ namespace Bfyoc.Functions
         public string LocationName { get; set; }
         public int Rating { get; set; }
         public string UserNotes { get; set; }
-        public DateTime Timestamp { get; private set; }
-        public Guid id { get; private set; }
+        public DateTime Timestamp { get; set; }
+        public Guid id { get; set; }
     }
 }
